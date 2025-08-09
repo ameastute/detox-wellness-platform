@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- GLOBAL ENUMS ---
+enum Title {
+  MR
+  MRS
+  DR
+}
+
+enum PractitionerRole {
+  DOCTOR
+  THERAPIST
+  COUNSELOR
+  CONSULTANT
+}
+
+enum PractitionerStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum ServiceCategory {
+  MIND
+  BODY
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ConsultationType {
+  ONLINE
+  OFFLINE
+  BOTH
+}
+
+// --- DATA MODELS ---
+
+model Practitioner {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  title             Title
+  name              String
+  email             String        @unique
+  password          String
+  role              PractitionerRole @default(THERAPIST)
+  status            PractitionerStatus @default(ACTIVE)
+  contactPrimary    String
+  contactSecondary  String?
+  credentials       String
+  photoUrl          String?
+  bio               String?       @db.Text
+  education         String?       @db.Text
+  certifications    String[]      @default([])
+  experienceInYears Int
+  languages         String[]
+  consultationType  ConsultationType @default(BOTH)
+  philosophy        String?
+  availability      Json?
+  
+  services          Service[]     @relation("PractitionerServices")
+  appointments      Appointment[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Service {
+  id           String        @id @default(cuid())
+  title        String        @unique
+  description  String
+  category     ServiceCategory
+  practitioners Practitioner[]   @relation("PractitionerServices")
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  patientName String
+  story       String
+  rating      Int
+  beforeImage String?
+  afterImage  String?
+  createdAt   DateTime @default(now())
+}
+
+model Program {
+  id           String        @id @default(cuid())
+  name         String
+  description  String
+  features     String[]
+  price        Float
+  sessions     Int           @default(1)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id               String            @id @default(cuid())
+  appointmentDate  DateTime
+  consultationType ConsultationType
+  status           AppointmentStatus @default(PENDING)
+  patientName      String
+  patientAge       Int
+  patientGender    String
+  patientMobile    String
+  patientEmail     String?
+  sessionDates     DateTime[]        @default([])
+  residentialMonth String?
+  residentialYear  String?
+  medicalReportUrl String?
+  
+  serviceId        String
+  service          Service  @relation(fields: [serviceId], references: [id])
+
+  practitionerId   String
+  practitioner     Practitioner @relation(fields: [practitionerId], references: [id])
+
+  programId        String
+  program          Program @relation(fields: [programId], references: [id])
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

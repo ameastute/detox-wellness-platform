@@ -1,0 +1,26 @@
+### Get all specialists (should be empty at first)
+GET http://localhost:5000/api/specialists
+
+### Create a new specialist
+POST http://localhost:5000/api/specialists
+Content-Type: application/json
+
+{
+  "name": "Dr. Anjali Sharma",
+  "credentials": "MBBS, MD (Psychiatry)",
+  "experienceInYears": 12,
+  "languages": ["English", "Hindi", "Malayalam"],
+  "consultationType": "BOTH"
+}
+
+### Create another specialist
+POST http://localhost:5000/api/specialists
+Content-Type: application/json
+
+{
+  "name": "Mr. Ben Thomas",
+  "credentials": "MPT (Ortho)",
+  "experienceInYears": 8,
+  "languages": ["English", "Malayalam"],
+  "consultationType": "OFFLINE"
+}
